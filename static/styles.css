@@ -1,1 +1,60 @@
+body {
+    background-color: #f8f9fa;
+}
 
+.signup-card {
+    max-width: 800px;
+    border-radius: 10px;
+    background-color: #ffffff;
+}
+
+.login-card {
+    max-width: 400px;
+    border-radius: 10px;
+    background-color: #ffffff;
+}
+
+h2 {
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+}
+
+form .form-label {
+    font-size: 1.1rem;
+}
+
+.btn-primary {
+    background-color: #6495ed;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #1e90ff;
+}
+
+.text-warning {
+    font-size: 0.9rem;
+}
+
+.text-success {
+    font-size: 0.9rem;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.table th, .table td {
+    text-align: center;
+}
+
+.chart-placeholder {
+    width: 100%;
+    height: 200px;
+    background-color: #d1d1d1;
+    border-radius: 5px;
+    text-align: center;
+    line-height: 200px;
+    font-size: 20px;
+    color: #777;
+}
