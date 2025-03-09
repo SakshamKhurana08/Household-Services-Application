@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        .heading {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .navbar a {
+            color: #fff !important;
+            font-weight: bold;
+        }
+        .navbar-brand {
+            margin-left: 15px;
+        }
+        .clickable {
+            cursor: pointer;
+            color: #007bff;
+            text-decoration: underline;
+        }
+        .professional-id, .user-id {
+            width: 180px;
+        }
+        .professional-name, .user-name {
+            width: 200px;
+        }
+        .professional-service {
+            width: 350px;
+        }
+        .professional-experience {
+            width: 200px;
+        }
+        .professional-picture {
+            width: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #007bff;
+            max-width: 100%;
+            height: auto;
+        }
+        .status-approved {
+            color: green !important;
+            font-weight: bold;
+        }
+        .status-blocked {
+            color: red !important;
+            font-weight: bold;
+        }
+        .card {
+            border: none;
+        }
+        .card h6 {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .modal-content {
+            border-radius: 10px;
+        }
+        .modal-body p {
+            margin: 0;
+        }
+    </style>  
+</head>
+<body>
+
+<div class="modal fade" id="professionalDetailsModal" tabindex="-1" aria-labelledby="professionalDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="professionalDetailsModalLabel">Professional Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3 p-3 shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6><i class="bi bi-person-circle"></i> <strong>ID:</strong></h6>
+                                <p id="professionalId"></p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6><i class="bi bi-person"></i> <strong>Name:</strong></h6>
+                                <p id="professionalName"></p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6><i class="bi bi-envelope"></i> <strong>Email:</strong></h6>
+                                <p id="professionalEmail"></p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6><i class="bi bi-briefcase"></i> <strong>Experience:</strong></h6>
+                                <p id="professionalExperience"></p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6><i class="bi bi-tools"></i> <strong>Service:</strong></h6>
+                                <p id="professionalService"></p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6><i class="bi bi-tools"></i> <strong>Service Subtype:</strong></h6>
+                                <p id="professionalServiceSubtype"></p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6><i class="bi bi-tools"></i> <strong>No. of Services Rejected:</strong></h6>
+                                <p id="professionalServiceReject"></p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6><i class="bi bi-check-circle"></i> <strong>Status:</strong></h6>
+                                <p id="professionalStatus" class="status-approved"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <div class="card mb-3 shadow-sm">
+                            <h6><i class="bi bi-image"></i> <strong>Picture:</strong></h6>
+                            <img id="professionalPicture" src="" alt="Professional Picture" class="professional-picture mb-3 mx-auto d-block w-50" />
+                            <h6><i class="bi bi-file-earmark-text"></i> <strong>Document:</strong></h6>
+                            <a id="professionalDocument" href="#" target="_blank" class="btn btn-primary">View Document</a>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <div class="card p-3 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6><i class="bi bi-house-door"></i> <strong>Address:</strong></h6>
+                        <p id="professionalAddress"></p>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6><i class="bi bi-pin-map"></i> <strong>Pin Code:</strong></h6>
+                        <p id="professionalPincode"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addServiceModal" tabindex="-1" aria-labelledby="addServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addServiceModalLabel">Add New Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addServiceForm" action="{{ url_for('add_service') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="serviceName" class="form-label">Service Name</label>
+                        <input type="text" class="form-control" id="serviceName" name="service_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="serviceSubtype" class="form-label">Service Subtype</label>
+                        <input type="text" class="form-control" id="serviceSubtype" name="service_subtype" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="serviceDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="serviceDescription" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="servicePrice" class="form-label">Base Price (₹)</label>
+                        <input type="number" class="form-control" id="servicePrice" name="base_price" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Service</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="serviceDetailsModal" tabindex="-1" aria-labelledby="serviceDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="serviceDetailsModalLabel">Service Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Service ID:</strong> <span id="serviceId"></span></p>
+                <p><strong>Service Name:</strong> <span id="serviceName2"></span></p>
+                <p><strong>Service Subtype:</strong> <span id="serviceSubtype2"></span></p>
+                <p><strong>Description:</strong> <span id="serviceDescription2"></span></p>
+                <p><strong>Base Price:</strong> <span id="servicePrice2"></span></p>
+                <p><strong>Rating:</strong> <span id="serviceRating2"></span></p>
+                <p><strong>Professionals Registered:</strong></p>
+                <ul id="professionalsList"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editServiceModal" tabindex="-1" aria-labelledby="editServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editServiceModalLabel">Edit Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editServiceForm" action="{{ url_for('edit_service') }}" method="POST">
+                    <input type="hidden" id="editServiceId" name="service_id">
+                    <div class="mb-3">
+                        <label for="editServiceName" class="form-label">Service Name</label>
+                        <input type="text" class="form-control" id="editServiceName" name="service_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editServiceSubtype" class="form-label">Service Subtype</label>
+                        <input type="text" class="form-control" id="editServiceSubtype" name="service_subtype" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editServiceDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="editServiceDescription" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editServicePrice" class="form-label">Base Price (₹)</label>
+                        <input type="number" class="form-control" id="editServicePrice" name="base_price" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Admin Dashboard</a>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_search') }}">Search</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_summary') }}">Summary</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h1 class="text-center heading">Admin Dashboard</h1>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="mb-0">
+                <a data-bs-toggle="collapse" href="#collapseServices" role="button" aria-expanded="true" aria-controls="collapseServices" class="text-decoration-none">
+                    Services
+                </a>
+            </h3>
+        </div>
+        <div id="collapseServices" class="collapse show">
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Service ID</th>
+                            <th>Service Name</th>
+                            <th>Service Subtype</th>
+                            <th>Description</th>
+                            <th>Base Price (₹)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service in services %}
+                        <tr>
+                            <td><a href="#" onclick="showServiceDetails({{ service.id }})">{{ service.id }}</a></td>
+                            <td>{{ service.service_name }}</td>
+                            <td>{{ service.service_subtype }}</td>
+                            <td>{{ service.description }}</td>
+                            <td>₹ {{ service.base_price }}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="editService({{ service.id }})">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteService({{ service.id }})">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="text-center mt-3">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">Add New Service</button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="mb-0">
+                <a data-bs-toggle="collapse" href="#collapseProfessionals" role="button" aria-expanded="true" aria-controls="collapseProfessionals" class="text-decoration-none">
+                    Professionals
+                </a>
+            </h3>
+        </div>
+        <div id="collapseProfessionals" class="collapse show">
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="professional-id">Professional ID</th>
+                            <th class="professional-name">Name</th>
+                            <th class="professional-experience">Experience (yrs)</th>
+                            <th class="professional-service">Service</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for professional in professionals %}
+                        {% for service in services %}
+                        {% if service.id == professional.service %}
+                        <tr>
+                            <td><a href="javascript:void(0);" onclick="showProfessionalDetails({{ professional.id }});">{{ professional.id }}</a></td>
+                            <td>{{ professional.fullname }}</td>
+                            <td>{{ professional.experience }}</td>
+                            <td>{{ service.service_name }} - {{ service.service_subtype}}</td>
+                            <td>
+                                {% if professional.status == 'Pending' %}
+                                    <button class="btn btn-success btn-sm" onclick="approveProfessional({{ professional.id }})">Approve</button>
+                                    <button class="btn btn-danger btn-sm" onclick="rejectProfessional({{ professional.id }})">Reject</button>
+                                {% elif professional.status == 'Approved' %}
+                                    <button class="btn btn-warning btn-sm" onclick="blockProfessional({{ professional.id }})">Block</button>
+                                {% elif professional.status == 'Blocked' %}
+                                    <button class="btn btn-success btn-sm" onclick="unblockProfessional({{ professional.id }})">Unblock</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="mb-0">
+                <a data-bs-toggle="collapse" href="#collapseUsers" role="button" aria-expanded="true" aria-controls="collapseUsers" class="text-decoration-none">
+                    Users
+                </a>
+            </h3>
+        </div>
+        <div id="collapseUsers" class="collapse show">
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="user-id">User ID</th>
+                            <th class="user-name">Name</th>
+                            <th class="user-email">Email</th>
+                            <th class="user-address">Address</th>
+                            <th class="user-pincode">Pin Code</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.fullname }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.address }}</td>
+                            <td>{{ user.pincode }}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="deleteUser({{ user.id }})">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="mb-0">
+                <a data-bs-toggle="collapse" href="#collapseRequests" role="button" aria-expanded="true" aria-controls="collapseRequests" class="text-decoration-none">
+                    Service Requests
+                </a>
+            </h3>
+        </div>
+        <div id="collapseRequests" class="collapse show">
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Request ID</th>
+                            <th>User ID</th>
+                            <th>Professional ID</th>
+                            <th>Service ID</th>
+                            <th>Date</th>
+                            <th>Rating</th>
+                            <th>Remark</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in services_list %}
+                        <tr>
+                            <td>{{ request.id }}</td>
+                            <td>{{ request.user_id }}</td>
+                            <td>{{ request.professional_id }}</td>
+                            <td>{{ request.service_id }}</td>
+                            <td>{{ request.req_date }}</td>
+                            <td>{{ request.rating }}</td>
+                            <td>{{ request.remark }}</td>
+                            <td>{{ request.status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+<script>
+    function openAddServiceModal() {
+        var addServiceModal = new bootstrap.Modal(document.getElementById('addServiceModal'));
+        addServiceModal.show();
+    }
+
+    document.getElementById('addServiceForm').addEventListener('submit', function(event) {
+    event.preventDefault(); 
+
+    const serviceName = document.getElementById('serviceName').value;
+    const serviceDescription = document.getElementById('serviceDescription').value;
+    const servicePrice = document.getElementById('servicePrice').value;
+    const serviceSubtype = document.getElementById('serviceSubtype').value;
+
+    fetch('/add_service', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            service_name: serviceName,
+            description: serviceDescription,
+            base_price: servicePrice,
+            service_subtype: serviceSubtype
+        })
+    })
+    .then(response => {
+        if (response.ok) {
+            alert("Service added successfully!");
+            location.reload(); 
+        } else {
+            alert("Failed to add service.");
+        }
+    })
+    .catch(error => console.error('Error:', error));
+    });
+
+    function approveProfessional(id) {
+        console.log("TEST")
+        fetch(`/approve_professional/${id}`, { method: 'POST' })
+        .then(response => {
+            if (response.ok) {
+                alert("Professional approved successfully!");
+                location.reload();
+            } else {
+                alert("Failed to approve professional.");
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function blockProfessional(id) {
+        if (confirm("Are you sure you want to block this professional?")) {
+            fetch(`/block_professional/${id}`, { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    alert("Professional blocked successfully!");
+                    location.reload();
+                } else {
+                    alert("Failed to block professional.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+
+    function unblockProfessional(id) {
+        if (confirm("Are you sure you want to unblock this professional?")) {
+            fetch(`/unblock_professional/${id}`, { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    alert("Professional unblocked successfully!");
+                    location.reload();
+                } else {
+                    alert("Failed to unblock professional.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+
+    function rejectProfessional(id) {
+        if (confirm("Are you sure you want to reject this professional?")) {
+            fetch(`/reject_professional/${id}`, { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    alert("Professional rejected successfully!");
+                    location.reload();
+                } else {
+                    alert("Failed to reject professional.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+
+    function deleteUser(id) {
+        if (confirm("Are you sure you want to delete this user?")) {
+            fetch(`/delete_user/${id}`, { method: 'DELETE' })
+            .then(response => {
+                if (response.ok) {
+                    alert("User deleted successfully!");
+                    location.reload();
+                } else {
+                    alert("Failed to delete user.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+
+    function deleteService(id) {
+        if (confirm("Are you sure you want to delete this service?")) {
+            fetch(`/delete_service/${id}`, { method: 'DELETE' })
+            .then(response => {
+                if (response.ok) {
+                    alert("Service deleted successfully!");
+                    location.reload();
+                } else {
+                    alert("Failed to delete service.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+
+    function editService(serviceId) {
+    fetch(`/get_service_details/${serviceId}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('editServiceId').value = data.id;
+            document.getElementById('editServiceName').value = data.service_name;
+            document.getElementById('editServiceDescription').value = data.description;
+            document.getElementById('editServicePrice').value = data.base_price;
+            document.getElementById('editServiceSubtype').value = data.service_subtype;
+
+            var editServiceModal = new bootstrap.Modal(document.getElementById('editServiceModal'));
+            editServiceModal.show();
+        })
+        .catch(error => console.error('Error fetching service details:', error));
+    }
+
+    document.getElementById('editServiceForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const serviceId = document.getElementById('editServiceId').value;
+    const serviceName = document.getElementById('editServiceName').value;
+    const serviceDescription = document.getElementById('editServiceDescription').value;
+    const servicePrice = document.getElementById('editServicePrice').value;
+    const serviceSubtype = document.getElementById('editServiceSubtype').value;
+
+    fetch('/edit_service', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            service_id: serviceId,
+            service_name: serviceName,
+            description: serviceDescription,
+            base_price: servicePrice,
+            service_subtype: serviceSubtype
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Service updated successfully!");
+            location.reload();
+        } else {
+            alert("Failed to update service: " + data.error);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+    function showServiceDetails(serviceId) {
+        fetch(`/get_service_details_with_professionals/${serviceId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('serviceId').innerText = data.id || 'N/A';
+                document.getElementById('serviceName2').innerText = data.service_name || 'N/A';
+                document.getElementById('serviceDescription2').innerText = data.description || 'N/A';
+                document.getElementById('servicePrice2').innerText = data.base_price || 'N/A';
+                document.getElementById('serviceRating2').innerText = data.rating || 'N/A';
+                document.getElementById('serviceSubtype2').innerText = data.service_subtype || 'N/A';
+
+                const professionalsList = document.getElementById('professionalsList');
+                professionalsList.innerHTML = ''; 
+                data.professionals.forEach(professional => {
+                    const listItem = document.createElement('li');
+
+                    const professionalName = document.createElement('span');
+                    professionalName.textContent = professional.fullname;
+                    professionalName.classList.add('clickable');
+                    professionalName.addEventListener('click', () => {
+                        showProfessionalDetails(professional.id);
+                    });
+
+                    listItem.appendChild(professionalName);
+                    professionalsList.appendChild(listItem);
+                });
+
+                const serviceDetailsModal = new bootstrap.Modal(document.getElementById('serviceDetailsModal'));
+                serviceDetailsModal.show();
+            })
+            .catch(error => console.error('Error fetching service details:', error));
+    }
+
+    function showProfessionalDetails(professionalId) {
+        const serviceDetailsModal = bootstrap.Modal.getInstance(document.getElementById('serviceDetailsModal'));
+        if (serviceDetailsModal) {
+            serviceDetailsModal.hide();
+        }
+
+        fetch(`/get_professional_details/${professionalId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('professionalId').innerText = data.id;
+                document.getElementById('professionalName').innerText = data.fullname;
+                document.getElementById('professionalEmail').innerText = data.email;
+                document.getElementById('professionalExperience').innerText = `${data.experience} years`;
+                document.getElementById('professionalService').innerText = data.ser_name;
+                document.getElementById('professionalServiceSubtype').innerText = data.ser_sub;
+                document.getElementById('professionalStatus').innerText = data.status;
+                document.getElementById('professionalServiceReject').innerText = data.rejected_service_count;
+
+                const statusElement = document.getElementById('professionalStatus');
+                if (data.status === 'Approved') {
+                    statusElement.classList.add('status-approved');
+                    statusElement.classList.remove('status-blocked');
+                } else if (data.status === 'Blocked') {
+                    statusElement.classList.add('status-blocked');
+                    statusElement.classList.remove('status-approved');
+                }
+
+                document.getElementById('professionalAddress').innerText = data.address;
+                document.getElementById('professionalPincode').innerText = data.pincode;
+
+                const documentElement = document.getElementById('professionalDocument');
+                if (data.document_url) {
+                    documentElement.href = data.document_url;
+                    documentElement.style.display = 'inline-block';
+                } else {
+                    documentElement.style.display = 'none';
+                }
+
+                const pictureElement = document.getElementById('professionalPicture');
+                if (data.picture_url) {
+                    pictureElement.src = data.picture_url;
+                } else {
+                    pictureElement.src = '';
+                }
+
+                const professionalDetailsModal = new bootstrap.Modal(document.getElementById('professionalDetailsModal'));
+                professionalDetailsModal.show();
+            })
+            .catch(error => console.error('Error fetching professional details:', error));
+    }
+
+</script>
+</body>
+</html>

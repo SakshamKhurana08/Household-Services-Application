@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ service_name }} - Service Details</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f1f5f9;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .service-header {
+            background-color: #3a8dff; 
+            color: white;
+            padding: 50px 20px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .service-header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .service-header p {
+            font-size: 1.25rem;
+            font-weight: 400;
+        }
+
+        .service-card {
+            border-radius: 15px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .service-card .card-body {
+            padding: 25px;
+            text-align: center;
+        }
+        .service-card .card-title {
+            font-size: 1.75rem;
+            color: #333333;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .service-card .card-text {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        .service-card .price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .date-picker {
+            margin-bottom: 15px;
+        }
+
+        .btn-book {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-align: center;
+            width: 100%;
+            transition: background-color 0.3s, transform 0.2s ease;
+        }
+
+        .btn-book:hover {
+            background-color: #0056b3; 
+            transform: scale(1.05);
+        }
+
+        .btn-back {
+            background-color: #ff9a8b;
+            color: white;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            display: inline-block;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .btn-back:hover {
+            background-color: #ff6f61;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .service-header h1 {
+                font-size: 2rem;
+            }
+
+            .service-card .card-body {
+                padding: 20px;
+            }
+
+            .btn-book {
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <a href="{{ url_for('user_dashboard') }}" class="btn-back">&larr; Back to Dashboard</a>
+
+    <div class="service-header">
+        <h1>{{ service_name }} Services</h1>
+        <p class="lead">Browse and book the best services under the "{{ service_name }}" category</p>
+    </div>
+
+    <div class="row justify-content-center align-items-center">
+        {% for service in services %}
+        <div class="col-md-4 mb-4">
+            <div class="service-card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ service.service_subtype }}</h5>
+                    <p class="card-text">{{ service.description }}</p>
+                    <p class="price">₹{{ service.base_price }}</p>
+                    {% if service.avg_rating == None %}
+                    <p class="rating">Average rating: {{ service.avg_rating }}</p>
+                    {% else %}
+                    <p class="rating">Average rating: {{ service.avg_rating | round(2) }}</p>
+                    {% endif %}
+                    <input type="date" class="form-control date-picker mb-2" id="date-{{ service.id }}" min="{{ today }}" />
+                    <input type="time" class="form-control time-picker" id="time-{{ service.id }}" />
+                    <button 
+                        class="btn-book" 
+                        onclick="bookService('{{ url_for('book_service', service_id=service.id, user_id=user_id) }}', '{{ service.id }}')">
+                        Book Now
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function bookService(baseUrl, serviceId) {
+        const dateInput = document.getElementById(`date-${serviceId}`);
+        const timeInput = document.getElementById(`time-${serviceId}`);
+        const selectedDate = dateInput.value;
+        const selectedTime = timeInput.value;
+
+        if (!selectedDate || !selectedTime) {
+            alert("Please select both a date and time before booking!");
+            return;
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        if (selectedDate < today) {
+            alert("Please select a valid date (future date only).");
+            return;
+        }
+
+        if (!selectedTime) {
+            alert("Please select a time before booking!");
+            return;
+        }
+
+        const [hours, minutes] = selectedTime.split(':').map(Number);
+        if (hours < 9 || (hours >= 19 && minutes > 0)) {
+            alert("Please select a time between 9:00 AM and 7:00 PM.");
+            return;
+        }
+
+        const bookingUrl = `${baseUrl}&date=${selectedDate}&time=${selectedTime}`;
+        window.location.href = bookingUrl;
+    }
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

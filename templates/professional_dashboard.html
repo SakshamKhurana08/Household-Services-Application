@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Professional Dashboard</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f7f7f7;
+            font-family: 'Roboto', sans-serif;
+        }
+        .btn-close {
+            width: 0.5em;
+            height: 0.5em;
+            background-color: transparent;
+            border: none;
+        }
+        .navbar a {
+            color: #fff !important;
+            font-weight: bold;
+        }
+        .navbar-brand {
+            margin-left: 15px;
+        }
+        .navbar {
+            margin-bottom: 10px;
+            background-color: #007bff;
+            width: 100%;
+        }
+        .section-heading {
+            font-size: 1.6rem;
+            font-weight: 500;
+            margin-top: 30px;
+            color: #333;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+            padding: 12px 15px;
+        }
+        .table th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+        }
+        .table .customer-name-column {
+            width: 18%;
+        }
+        .table .customer-email-column {
+            width: 20%;
+        }
+        .table .customer-location-column {
+            width: 25%;
+        }
+        .table .btn-action {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            margin-right: 5px;
+            border-radius: 5px;
+            text-transform: uppercase;
+        }
+        .alert-info {
+            background-color: #e7f3fe;
+            color: #3182ce;
+            font-size: 1.1rem;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            border-left: 4px solid #3182ce;
+        }
+        .action-column {
+            width: 14%;
+            text-align: center;
+        }
+        .service-card {
+            background-color: #fff5e1;
+            border: 1px solid #ffe4b3;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .service-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-color: #ffdb8c;
+        }
+        .service-card h5 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #007bff;
+            text-align: center;
+        }
+        .service-card .service-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .service-card .service-description {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .service-card .service-actions {
+            display: flex;
+            justify-content: space-around;
+        }
+        .service-card .btn-accept, .service-card {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            text-transform: uppercase;
+        }
+        .btn-accept {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-accept:hover {
+            background-color: #218838;
+        }
+        .btn-reject {
+            background-color: #ff0000;
+            color: white;
+        }
+        .btn-reject:hover {
+            background-color: #ca1212;
+        }
+    </style>    
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="#">Welcome, {{ professional_name }}</a>
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('professional_search', id=professional.id) }}">Search</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('professional_summary') }}">Summary</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+
+<div class="modal fade" id="editProfessionalProfileModal" tabindex="-1" aria-labelledby="editProfessionalProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfessionalProfileModalLabel">Edit Professional Profile</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfessionalProfileForm" action="{{ url_for('edit_professional_profile') }}" method="POST">
+                    <input type="hidden" id="editProfessionalId" name="professional_id" value="{{ professional.id }}">
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail" name="email" value="{{ professional.email }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editService" class="form-label">Service ID</label>
+                        <input type="text" class="form-control" id="editService" name="service" value="{{ professional.service }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editFullName" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="editFullName" name="fullname" value="{{ professional.fullname }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editExperience" class="form-label">Experience (in years)</label>
+                        <input type="number" class="form-control" id="editExperience" name="experience" value="{{ professional.experience }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAddress" class="form-label">Address</label>
+                        <textarea class="form-control" id="editAddress" name="address" rows="3" required>{{ professional.address }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPincode" class="form-label">Pincode</label>
+                        <input type="text" class="form-control" id="editPincode" name="pincode" value="{{ professional.pincode }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-end mb-3">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editProfessionalProfileModal">
+            Edit Profile
+        </button>
+    </div>
+
+    {% if approval_pending %}
+        <div class="alert alert-info" role="alert">
+            You are currently awaiting approval from the admin. Please check back later.
+        </div>
+    {% else %}
+        <h3 class="section-heading">Open Services</h3>
+        {% if open_services|length == 0 %}
+            <div class="alert alert-info" role="alert">
+                No open services available at the moment.
+            </div>
+        {% else %}
+            <div class="row">
+                {% for service in open_services %}
+                    <div class="col-md-4">
+                        <div class="service-card" style="padding-top: 10px; padding-bottom: 10px;">
+                            <h5>{{ service.name }}</h5>
+                            <p class="service-meta">{{ service.customer_name }} - {{ service.date }}</p>
+                            <p class="service-description">{{ service.subtype }}</p>
+                            <p class="service-description">Pincode - {{ service.pincode }}</p>
+                            <div class="service-actions">
+                                <form method="POST" action="/accept_service/{{ service.id }}">
+                                    <button class="btn btn-accept" type="submit">ACCEPT</button>
+                                </form>
+                                <form action="{{ url_for('reject_service', service_id=service['id']) }}" method="POST">
+                                    <button type="submit" class="btn btn-reject">REJECT</button>
+                                </form>                                
+                            </div>                        
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <h3 class="section-heading">Assigned Services</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="text-center">ID</th>
+                        <th class="text-center">Customer Name</th>
+                        <th class="text-center">Customer Email</th>
+                        <th class="text-center">Location</th>
+                        <th class="text-center">Service</th>
+                        <th class="text-center">Date</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in assigned_services %}
+                    <tr>
+                        <td>{{ service.id }}</td>
+                        <td>{{ service.customer_name }}</td>
+                        <td>{{ service.customer_email }}</td>
+                        <td>{{ service.location }}</td>
+                        <td>{{ service.name }} - {{ service.subtype }}</td>
+                        <td>{{ service.date }}</td>
+                        <td>Assigned</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="section-heading">Closed Services</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="text-center">ID</th>
+                        <th class="text-center">Customer Name</th>
+                        <th class="text-center">Customer Email</th>
+                        <th class="text-center">Location</th>
+                        <th class="text-center">Service</th>
+                        <th class="text-center">Date</th>
+                        <th class="text-center">Rating</th>
+                        <th class="text-center">Remark</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in closed_services %}
+                    <tr>
+                        <td>{{ service.id }}</td>
+                        <td>{{ service.customer_name }}</td>
+                        <td>{{ service.customer_email }}</td>
+                        <td>{{ service.location }}</td>
+                        <td>{{ service.name }} - {{ service.subtype }}</td>
+                        <td>{{ service.date }}</td>
+                        <td>{{ service.rating }}</td>
+                        <td>{{ service.remark }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

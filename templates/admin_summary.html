@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Summary</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .navbar a {
+            color: #fff !important;
+            font-weight: bold;
+        }
+        .navbar-brand {
+            margin-left: 15px;
+        }
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border: none;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+            padding: 8px;
+        }
+        .chart-container {
+            height: 200px;
+            width: 100%;
+            position: relative;
+        }
+        .heading {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .chart-legend {
+            font-size: 8px;
+            font-weight: 600;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 6px;
+            margin-bottom: 2px;
+        }
+        .legend-color-box {
+            width: 12px; 
+            height: 5px;
+            margin-right: 3px;
+        }
+        .navbar {
+            margin-bottom: 10px;
+        }
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .card-container .card {
+            flex: 1 1 48%;
+            margin-bottom: 10px;
+        }
+        @media (min-width: 992px) {
+            .card-container .card {
+                flex: 1 1 30%;
+            }
+        }
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
+        .chart-container {
+            max-height: 250px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_dashboard') }}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_search') }}">Search</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="text-center heading">Admin Dashboard Summary</h1>
+
+        <div class="card-container">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="text-muted">Professionals</h5>
+                    <canvas id="professionalStatusChart" class="chart-container"></canvas>
+                    <div class="chart-legend" id="professionalStatusLegend"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="text-muted">Average Rating Per Professional</h5>
+                    <canvas id="averageProfessionalRatingChart" class="chart-container"></canvas>
+                    <div class="chart-legend" id="averageRatingLegend"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-container">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="text-muted">Average Customer Ratings</h5>
+                    <canvas id="customerRatingsChart" class="chart-container"></canvas>
+                    <div class="chart-legend" id="customerRatingsLegend"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="text-muted">Registered Professionals by Subcategory</h5>
+                    <canvas id="professionalsBySubcategoryChart" class="chart-container"></canvas>
+                    <div class="chart-legend" id="professionalsBySubcategoryLegend"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const customerData = JSON.parse('{{ customer_data | safe }}');
+        const professionalStatusData = JSON.parse('{{ professional_status_data | safe }}');
+        const avgProfessionalRatingData = JSON.parse('{{ avg_professional_rating_data | safe }}');
+        const professionalsBySubcategoryData = JSON.parse('{{ professionals_by_subcategory_data | safe }}');
+
+        const colorPalette = [
+            '#4A90E2', '#50E3C2', '#B8E986', '#F5A623', '#FF5E79',
+            '#9013FE', '#7ED321', '#D0021B', '#F8E71C', '#8B572A'
+        ];
+
+        const ctx1 = document.getElementById('professionalStatusChart').getContext('2d');
+        const professionalStatusChart = new Chart(ctx1, {
+            type: 'pie',
+            data: {
+                ...professionalStatusData,
+                datasets: [{
+                    ...professionalStatusData.datasets[0],
+                    backgroundColor: colorPalette
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 12 }, padding: 10, boxWidth: 18 }
+                    }
+                }
+            }
+        });
+
+        const ctx2 = document.getElementById('averageProfessionalRatingChart').getContext('2d');
+        const avgRatingChart = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                ...avgProfessionalRatingData,
+                datasets: [{
+                    ...avgProfessionalRatingData.datasets[0],
+                    backgroundColor: colorPalette.slice(0, avgProfessionalRatingData.datasets[0].data.length)
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    x: { beginAtZero: true },
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        const ctx3 = document.getElementById('customerRatingsChart').getContext('2d');
+        const customerRatingsChart = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                ...customerData,
+                datasets: [{
+                    ...customerData.datasets[0],
+                    backgroundColor: colorPalette.slice(0, customerData.datasets[0].data.length)
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    x: { beginAtZero: true },
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        const ctx4 = document.getElementById('professionalsBySubcategoryChart').getContext('2d');
+        const professionalsBySubcategoryChart = new Chart(ctx4, {
+            type: 'pie',
+            data: {
+                ...professionalsBySubcategoryData,
+                datasets: [{
+                    ...professionalsBySubcategoryData.datasets[0],
+                    backgroundColor: colorPalette
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 12 }, padding: 10, boxWidth: 18 }
+                    }
+                }
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f8;
+            font-family: 'Roboto', sans-serif;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+        }
+
+        .confirmation-alert {
+            background-color: #30475e;
+            color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .confirmation-alert h4 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .invoice {
+            background-color: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            color: #4a4a4a;
+        }
+
+        .invoice-header {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .invoice-header h5 {
+            font-size: 1.5rem;
+            color: #30475e;
+            font-weight: 600;
+        }
+
+        .invoice-body {
+            text-align: justify;
+            padding: 0 10px;
+        }
+
+        .invoice-body p {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .highlight-text {
+            color: #f28b82;
+            font-weight: 600;
+        }
+
+        .btn-dashboard {
+            background-color: #f28b82;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 25px;
+            padding: 10px 25px;
+            text-align: center;
+            margin-top: 20px;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-dashboard:hover {
+            background-color: #e3776e; 
+            text-decoration: none;
+        }
+
+        .invoice-footer {
+            font-size: 0.9rem;
+            color: #777;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .confirmation-alert h4 {
+                font-size: 1.5rem;
+            }
+
+            .invoice {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="confirmation-alert">
+        <h4 class="alert-heading">Booking Confirmed!</h4>
+        <p>Your booking request ID <span class="highlight-text">{{ booking_id }}</span> for the service 
+        <span class="highlight-text">{{ service_name }} - {{ service_subtype }}</span> has been successfully recorded.</p>
+        <a href="{{ url_for('user_dashboard') }}" class="btn-dashboard">Go back to Dashboard</a>
+    </div>
+
+    <div class="invoice">
+        <div class="invoice-header">
+            <h5>Invoice</h5>
+        </div>
+        <div class="invoice-body">
+            <p><strong>Booking ID:</strong> <span class="highlight-text">{{ booking_id }}</span></p>
+            <p><strong>Service Name:</strong> <span>{{ service_name }} - {{ service_subtype }}</span></p>
+            <p><strong>Professional Name:</strong> <span>{{ professional_name }}</span></p>
+            <p><strong>Booking Date:</strong> <span>{{ booking_date }}</span></p>
+            <p><strong>Price:</strong> <span>₹{{ base_price }}</span></p>
+            <p><strong>Status:</strong> <span class="highlight-text">Requested</span></p>
+        </div>
+        <div class="invoice-footer">
+            <p>Thank you for booking with us! We look forward to serving you.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

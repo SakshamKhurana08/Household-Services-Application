@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Professional Signup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="card p-5 shadow-lg signup-card">
+            <h2 class="text-center mb-4 text-primary">Service Professional Signup</h2>
+
+            {% if email_exists %}
+            <div class="alert alert-danger text-center" role="alert">
+                This email is already registered. Please use a different email or try logging in.
+            </div>
+            {% endif %}
+
+            <form id="signup-form" method="POST" action="{{ url_for('handle_professional_register') }}" enctype="multipart/form-data" autocomplete="off">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email ID (Username):</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password:</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fullname" class="form-label">Fullname:</label>
+                            <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Enter your full name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="service" class="form-label">Service Name:</label>
+                            <select class="form-select" id="service" name="service" required>
+                                <option value="">Select available services</option>
+                                {% for service in services %}
+                                    <option value="{{ service.id }}">{{ service.service_name }} - {{ service.service_subtype }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="experience" class="form-label">Experience (in years):</label>
+                            <input type="number" class="form-control" id="experience" name="experience" placeholder="Enter your experience" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="document" class="form-label">Attach documents (Single PDF):</label>
+                            <input type="file" class="form-control" id="document" name="document" accept=".pdf" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="picture" class="form-label">Upload Profile Picture (JPG/PNG):</label>
+                            <input type="file" class="form-control" id="picture" name="picture" accept="image/jpeg, image/png" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address:</label>
+                            <textarea class="form-control" id="address" name="address" rows="1" placeholder="Enter your address" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pincode" class="form-label">Pin Code:</label>
+                            <input type="number" class="form-control" id="pincode" name="pincode" placeholder="Enter your pin code" required minlength="6" maxlength="6">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </div>
+
+                <div class="d-flex justify-content-center mt-3">
+                    <button type="button" class="btn btn-link text-danger mx-3" onclick="clearForm()">Clear</button>
+                    <a href="{{ url_for('login') }}" class="btn btn-link text-warning mx-3" role="button">Login here</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        window.onload = function() {
+            document.getElementById('signup-form').reset();
+        };
+        function clearForm() {
+            document.getElementById('signup-form').reset();
+        }
+    </script>
+
+</body>
+</html>

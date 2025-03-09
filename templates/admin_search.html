@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Search</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar a {
+            color: #fff !important;
+            font-weight: bold;
+        }
+        .navbar-brand {
+            margin-left: 15px;
+        }
+        body {
+            background-color: #f9f9f9;
+        }
+        h2, h4 {
+            color: #333;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .table-responsive {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Admin Search</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_dashboard') }}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_summary') }}">Summary</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="text-center">Admin Search</h2>
+        <p class="text-center text-muted">Search for Users, Professionals, Services, or Service Requests in the database.</p>
+    </div>
+    <div class="container my-4">
+        <form method="POST" action="/admin_search">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="search_text" class="form-label">Search Text</label>
+                    <input 
+                        type="text" 
+                        id="search_text" 
+                        name="search_text" 
+                        class="form-control" 
+                        placeholder="Enter keyword..." 
+                        value="{{ search_text }}" 
+                        required>
+                </div>
+                <div class="col-md-4">
+                    <label for="search_by" class="form-label">Search By</label>
+                    <select id="search_by" name="search_by" class="form-select" required>
+                        <option value="users" {% if search_by == 'users' %}selected{% endif %}>Users</option>
+                        <option value="professionals" {% if search_by == 'professionals' %}selected{% endif %}>Professionals</option>
+                        <option value="services" {% if search_by == 'services' %}selected{% endif %}>Services</option>
+                        <option value="service_requests" {% if search_by == 'service_requests' %}selected{% endif %}>Service Requests</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+            </div>
+        </form>        
+    </div>
+
+    <div class="container my-4">
+        {% if search_results %}
+        <h4 class="text-center">Search Results</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-light">
+                    <tr>
+                        {% if search_by == 'users' %}
+                        <th>ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Address</th>
+                        <th>Pincode</th>
+                        {% elif search_by == 'professionals' %}
+                        <th>ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Service</th>
+                        <th>Experience (Yrs)</th>
+                        <th>Address</th>
+                        <th>Pincode</th>
+                        <th>Status</th>
+                        {% elif search_by == 'services' %}
+                        <th>ID</th>
+                        <th>Service Name</th>
+                        <th>Subtype</th>
+                        <th>Description</th>
+                        <th>Base Price</th>
+                        {% elif search_by == 'service_requests' %}
+                        <th>ID</th>
+                        <th>User ID</th>
+                        <th>Professional ID</th>
+                        <th>Service ID</th>
+                        <th>Status</th>
+                        <th>Request Date</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in search_results %}
+                    <tr>
+                        {% if search_by == 'users' %}
+                        <td>{{ result.id }}</td>
+                        <td>{{ result.fullname }}</td>
+                        <td>{{ result.email }}</td>
+                        <td>{{ result.address }}</td>
+                        <td>{{ result.pincode }}</td>
+                        {% elif search_by == 'professionals' %}
+                        <td>{{ result.id }}</td>
+                        <td>{{ result.fullname }}</td>
+                        <td>{{ result.email }}</td>
+                        <td>{{ result.service_relation.service_name }} - {{ result.service_relation.service_subtype }}</td>
+                        <td>{{ result.experience }}</td>
+                        <td>{{ result.address }}</td>
+                        <td>{{ result.pincode }}</td>
+                        <td>{{ result.status }}</td>
+                        {% elif search_by == 'services' %}
+                        <td>{{ result.id }}</td>
+                        <td>{{ result.service_name }}</td>
+                        <td>{{ result.service_subtype }}</td>
+                        <td>{{ result.description }}</td>
+                        <td>{{ result.base_price }}</td>
+                        {% elif search_by == 'service_requests' %}
+                        <td>{{ result.id }}</td>
+                        <td>{{ result.user_id }}</td>
+                        <td>{{ result.professional_id }}</td>
+                        <td>{{ result.service_id }}</td>
+                        <td>{{ result.status }}</td>
+                        <td>{{ result.booking_request_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning text-center" role="alert">
+            No results found. Please refine your search and try again.
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
